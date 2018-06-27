@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="../css/normalize.css">
     <link rel="stylesheet" href="../css/skeleton.css">
     <link rel="stylesheet" href="../css/navbar.css">
+    <link rel="stylesheet" href="../css/projects.css">
 
     <!-- Favicon
     –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -99,6 +100,9 @@
         </div>
         <h6><b>Serial Input</b></h6>
         <p>With the use of Python 3.0 module <a href="https://pythonhosted.org/pyserial/">PySerial</a> reading input from a connected device is a possibility. Whether, this is via radio, infra-red communication or even simply entering G-Code into the terminal. This was achieved by creating a concurrent thread which consistently reads from the selected serial port (with the assistance of a mutex). If data is acquired it's sent through to the main "Plotter" class which then handles the command and processes the movement.</p>
+        
+        <h5><b>Source</b></h5>
+            <script src="https://gist.github.com/jsale26/b83f2080dfaac3d5717259bc052732dd.js"></script>
     </div>
   </div>
     
