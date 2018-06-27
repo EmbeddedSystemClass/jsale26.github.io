@@ -1,10 +1,10 @@
 """
 /**
   ******************************************************************************
-  * @file    Project2/main.py
+  * @file    gps.py
   * @author  Joshua Salecich - 43981722
-  * @date    01/06/2018
-  * @brief   Project 2 GUI Demonstration
+  * @date    23/06/2018
+  * @brief   Graphical Plotting Simulator
   *
   ******************************************************************************
   *
@@ -17,6 +17,8 @@ from threading import Lock
 import serial
 from multiprocessing import Queue
 import time
+import sys
+import glob
 
 # PARAMETERS
 WINDOW_SIZE = 600  # pixels
@@ -24,7 +26,7 @@ NUM_CELLS = 201
 GRID_LINE_WIDTH = 1  # pixels
 SYMBOL_WIDTH = WINDOW_SIZE / NUM_CELLS  # pixels
 PEN_SIZE = 2
-VELOCITY = 1 / 50
+VELOCITY = 1 / 1000
 X_OFFSET = 0.2 
 Y_OFFSET = 1.25 
 
@@ -49,6 +51,8 @@ MM = 1
 payload_queue = Queue()
 read_mutex = Lock()
 
+# Global Variables
+current_port = -1
 
 """
 Plotter task. Controls everything.
@@ -79,7 +83,8 @@ class Plotter(Tk):
 
         self.canvas = Canvas(
             height=WINDOW_SIZE, width=WINDOW_SIZE,
-            bg=BG_COLOR, highlightthickness=GRID_LINE_WIDTH, highlightbackground=BORDER_COLOUR)
+            bg=BG_COLOR, highlightthickness=GRID_LINE_WIDTH,
+            highlightbackground=BORDER_COLOUR)
 
         self.coord_label = Label(text="Coordinate: XYZ00000000")
 
@@ -92,11 +97,11 @@ class Plotter(Tk):
         self.gcode_button = Button(text="Enter", command=self.handle_gcode)
 
         self.port_label = Label(text="Serial Port:")
-
-        buffer = StringVar(self)
         
-        self.port_menu = OptionMenu(self, buffer, "one", "two")
-
+        self.port_button = Button(text="Refresh", command=self.refresh_ports)
+        
+        self.refresh_ports()
+    
         self.complete_canvas()
 
         self.new_board()
@@ -106,24 +111,69 @@ class Plotter(Tk):
     """
     def complete_canvas(self):
         
-        self.title("Graphical Plotting Simulator")
+        self.title("Graphical Plotting Simulator - Joshua Salecich")
 
         self.port_label.grid(row = 0, column = 0)
 
+        self.port_menu.config(width=20)
+
         self.port_menu.grid(row = 1, column = 0)
+
+        self.port_button.grid(row = 1, column = 1)
+
+        self.coord_label.grid(row = 0, column = 2) 
+
+        self.clear_button.grid(row = 1, column = 2) 
         
-        self.coord_label.grid(row = 0, column = 1) 
-
-        self.clear_button.grid(row = 1, column = 1) 
+        self.gcode_label.grid(row = 0, column = 3)
         
-        self.gcode_label.grid(row = 0, column = 2)
+        self.gcode_entry.grid(row = 1, column = 3)
+
+        self.gcode_button.grid(row = 1, column = 4)
+
+        self.canvas.grid(row = 2, column = 2) 
+
+
+    """
+    Refresh the available ports on the device.
+    """
+    def refresh_ports(self):
+
+        ports = -1
+        options = StringVar()
         
-        self.gcode_entry.grid(row = 1, column = 2)
+        if sys.platform.startswith('win'):
+            
+            ports = ['COM' + str(i + 1) for i in range(256)]
+            
+        elif (sys.platform.startswith('linux') or
+                sys.platform.startswith('cygwin')):
+            
+            ports = glob.glob('/dev/tty[A-Za-z]*')
 
-        self.gcode_button.grid(row = 1, column = 3)
+        if ports != -1:
+            
+            self.port_menu = OptionMenu(self, options, *ports,
+                                        command=self.update_port)
 
-        self.canvas.grid(row = 2, column = 1) 
+        else:
 
+            self.port_menu = OptionMenu(self, options, "None",
+                                        command=self.update_port)
+
+    def update_port(self, current_option):
+        
+        global current_port
+
+        if current_option != "None":
+            
+            current_port = current_option
+            
+        else:
+            
+            current_port = -1
+            
+            
     """
     Clear the canvas.
     """
@@ -396,7 +446,9 @@ class ProcessPayload(threading.Thread):
             read_mutex.acquire()
             
             read_buffer = serial_handler()
-            read_buffer = read_buffer.decode()
+            if read_buffer != -1:
+                read_buffer = read_buffer.decode()
+                payload_queue.put(read_buffer)
             
             read_mutex.release()
             
@@ -404,8 +456,17 @@ class ProcessPayload(threading.Thread):
 Receive from terminal.
 """
 def serial_handler():
-    port = serial.Serial("/dev/tty.usbmodem1421", baudrate=115200, timeout=None)
-    return port.read(350)
+    
+        global current_port
+        
+        if current_port != -1:
+            
+            port = serial.Serial(current_port, baudrate=115200, timeout=None)
+            return port.readline()
+        
+        else:
+            
+            return -1
 
 """
 Update Gui.
@@ -420,6 +481,7 @@ def main():
     receive_payload = ProcessPayload()
     receive_payload.start()
     root = Plotter()
+
 
     while True:
 
