@@ -61,7 +61,7 @@
         <h6><i>Joshua Salecich - 23/06/2018</i></h6></center>
         <p> One of my primary interests outside of Electrical and Computer Engineering is Woodworking. Over the Summer of 2017/2018 I found myself looking into CNC machines and the inner workings of the aforementioned. I was offered the opportunity to extend upon this interest in one of my Semester 1 2018 courses (CSSE3010).
         <br/><br/>
-        An embedded systems design course at its core - CSSE3010 also required the student to interact with a CNC machine to draw 2D graphics (compass rose shapes, polygons). However, with minimal access to (albeit faulty) CNC routers an extension task was to develop a graphical plotter - to make testing other features possible without direct CNC access.
+        An embedded systems design course at the core - CSSE3010 also required the student to interact with a CNC machine to draw 2D graphics (compass rose shapes, polygons). However, with minimal access to (albeit faulty) CNC routers an extension task was to develop a graphical plotter - to make testing other features possible without direct CNC access.
         <br/><br/>
         The selected language for this task is Python as it is most definitely my strongest object orientated language at this point in time. In addition to this G-Code is the computer code language used to control the simulated CNC. A specification in addition to this is that the python script reads the G-Code commands from the serial terminal aswell as an in built entry box (within the GUI). Below, a small demonstration of a square drawing is shown.
         </p>
@@ -99,7 +99,7 @@
             </table>
         </div>
         <h6><b>Serial Input</b></h6>
-        <p>With the use of Python 3.0 module <a href="https://pythonhosted.org/pyserial/" target="_blank">PySerial</a> reading input from a connected device is a possibility. Whether, this is via radio, infra-red communication or even simply entering G-Code into the terminal. This was achieved by creating a concurrent thread which consistently reads from the selected serial port (with the assistance of a mutex). If data is acquired it's sent through to the main "Plotter" class which then handles the command and processes the movement.</p>
+        <p>With the use of Python 3.0 module <a href="https://pythonhosted.org/pyserial/">PySerial</a> reading input from a connected device is a possibility. Whether, this is via radio, infra-red communication or even simply entering G-Code into the terminal. This was achieved by creating a concurrent thread which consistently reads from the selected serial port (with the assistance of a mutex). If data is acquired it's sent through to the main "Plotter" class which then handles the command and processes the movement.</p>
         
         <h5><b>Source</b></h5>
             <script src="https://gist.github.com/jsale26/b83f2080dfaac3d5717259bc052732dd.js"></script>
